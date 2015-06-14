@@ -1,5 +1,6 @@
-"use strict";
 var bigInt = (function () {
+    "use strict";
+
     var base = 10000000, logBase = 7, zeros = "0000000";
     var sign = {
         positive: false,
