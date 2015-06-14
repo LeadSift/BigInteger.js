@@ -77,12 +77,12 @@ var bigInt = (function () {
     }
 
     function fastDivModInternal(value, lambda) {
-        var quotient = [];
-        for (var i = 0; i < value.length; i++) {
+        var i, quotient = [];
+        for (i = 0; i < value.length; i++) {
             quotient[i] = 0;
         }
         var remainder = 0;
-        for (var i = value.length - 1; i >= 0; i--) {
+        for (i = value.length - 1; i >= 0; i--) {
             var divisor = remainder * base + value[i];
             var q = Math.floor(divisor / lambda);
             remainder = divisor - q * lambda;
@@ -160,11 +160,11 @@ var bigInt = (function () {
         var sign = this.sign !== n.sign;
 
         var a = this.value, b = n.value;
-        var result = [];
-        for (var i = a.length + b.length; i > 0; i--) {
+        var i, result = [];
+        for (i = a.length + b.length; i > 0; i--) {
             result.push(0);
         }
-        for (var i = 0; i < a.length; i++) {
+        for (i = 0; i < a.length; i++) {
             var x = a[i];
             for (var j = 0; j < b.length; j++) {
                 var y = b[j];
@@ -179,6 +179,7 @@ var bigInt = (function () {
     BigInteger.prototype.times = BigInteger.prototype.multiply;
 
     BigInteger.prototype.divmod = function (n) {
+        var i,carry;
         if (isSmall(n)) return fastDivMod(this, +n);
         n = parseInput(n);
         var quotientSign = this.sign !== n.sign;
@@ -189,7 +190,7 @@ var bigInt = (function () {
         };
         var a = this.value, b = n.value;
         var result = [0];
-        for (var i = 0; i < b.length; i++) {
+        for (i = 0; i < b.length; i++) {
             result[i] = 0;
         }
         var divisorMostSignificantDigit = b[b.length - 1];
@@ -204,9 +205,9 @@ var bigInt = (function () {
                 quotientDigit = Math.floor((remainder[shift + b.length] * base + remainder[shift + b.length - 1]) / divisorMostSignificantDigit);
             }
             // remainder -= quotientDigit * divisor
-            var carry = 0;
+            carry = 0;
             var borrow = 0;
-            for (var i = 0; i < divisor.length; i++) {
+            for (i = 0; i < divisor.length; i++) {
                 carry += quotientDigit * divisor[i];
                 var q = Math.floor(carry / base);
                 borrow += remainder[shift + i] - (carry - q * base);
@@ -221,8 +222,8 @@ var bigInt = (function () {
             }
             while (borrow !== 0) {
                 quotientDigit -= 1;
-                var carry = 0;
-                for (var i = 0; i < divisor.length; i++) {
+                carry = 0;
+                for (i = 0; i < divisor.length; i++) {
                     carry += remainder[shift + i] - base + divisor[i];
                     if (carry < 0) {
                         remainder[shift + i] = (carry + base) | 0;
@@ -454,7 +455,7 @@ var bigInt = (function () {
     };
 
     BigInteger.prototype.shiftRight = function (n) {
-        var remQuo = undefined;
+        var remQuo;
         if (!isSmall(n)) {
             if (n.isNegative()) return this.shiftLeft(n.abs());
             remQuo = this.divmod(bigInt(2).pow(n));
@@ -512,7 +513,7 @@ var bigInt = (function () {
     };
 
     BigInteger.prototype.and = function (n) {
-        return bitwise(this, n, function (a, b) { return a & b });
+        return bitwise(this, n, function (a, b) { return a & b; });
     };
 
     BigInteger.prototype.or = function (n) {
@@ -520,7 +521,7 @@ var bigInt = (function () {
     };
 
     BigInteger.prototype.xor = function (n) {
-        return bitwise(this, n, function (a, b) { return a ^ b });
+        return bitwise(this, n, function (a, b) { return a ^ b; });
     };
 
     BigInteger.prototype.toString = function (radix) {
@@ -556,18 +557,20 @@ var bigInt = (function () {
 
 
     function parseInput(text) {
+        var value;
         if (text instanceof BigInteger) return text;
         if (Math.abs(+text) < base && +text === (+text | 0)) {
-            var value = +text;
+            value = +text;
             return new BigInteger([Math.abs(value)], (value < 0 || (1 / value) === -Infinity));
         }
         text += "";
-        var s = sign.positive, value = [];
+        var s = sign.positive;
+        value = [];
         if (text[0] === "-") {
             s = sign.negative;
             text = text.slice(1);
         }
-        var text = text.split(/e/i);
+        text = text.split(/e/i);
         if (text.length > 2) throw new Error("Invalid integer: " + text.join("e"));
         if (text[1]) {
             var exp = text[1];
@@ -643,8 +646,8 @@ var bigInt = (function () {
         }
         if (base.equals(-1)) {
             if (n.equals(0)) return "0";
-            if (n.lesser(0)) return Array(1 - n).join("10");
-            return "1" + Array(+n).join("01");
+            if (n.lesser(0)) return (new Array(1 - n)).join("10");
+            return "1" + (new Array(+n)).join("01");
         }
         var minusSign = "";
         if (n.isNegative() && base.isPositive()) {
@@ -653,7 +656,7 @@ var bigInt = (function () {
         }
         if (base.equals(1)) {
             if (n.equals(0)) return "0";
-            return minusSign + Array(+n + 1).join(1);
+            return minusSign + (new Array(+n + 1)).join(1);
         }
         var out = [];
         var left = n, divmod;
